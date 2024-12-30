@@ -1,0 +1,64 @@
+{
+  "version": 3,
+  "$schema": "https://www.krakend.io/schema/v2.8/krakend.json",
+  "name": "users-api",
+  "timeout": "10s",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "/",
+      "method": "GET",
+      "output_encoding": "string",
+      "backend": [
+        {
+          "url_pattern": "/",
+          "encoding": "string",
+          "sd": "static",
+          "method": "GET",
+          "disable_host_sanitize": false,
+          "host": ["http://host.docker.internal:4000"]
+        }
+      ],
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 100,
+          "strategy": "ip"
+        }
+      }
+    },
+    {
+      "endpoint": "/users",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/users",
+          "encoding": "json",
+          "sd": "static",
+          "host": ["http://host.docker.internal:4000"],
+          "disable_host_sanitize": false
+        }
+      ],
+      "extra_config": {
+        "qos/ratelimit/router": {
+          "max_rate": 500,
+          "client_max_rate": 100,
+          "strategy": "ip"
+        }
+      }
+    },
+    {
+      "endpoint": "/users/{id}",
+      "method": "GET",
+      "backend": [
+        {
+          "url_pattern": "/users/{id}",
+          "host": ["http://host.docker.internal:4000"]
+        }
+      ]
+    }
+  ]
+}
